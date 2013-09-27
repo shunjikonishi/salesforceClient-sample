@@ -15,8 +15,8 @@
 	<h3>Sandboxに接続する場合</h3>
 	<p>Sandboxを使用する場合はSalesforceClientの生成後、ログインを行うよりも前にEndpointを「login.salesforce.com」から「test.salesforce.com」に変更します。
 	<pre>
-		SalesforceClient client;
-		String endpoint = client.getEndpoint().replace("login.salesforce.com", "test.salesforce.com");
-		client.setEndpoint(endpoint);
+SalesforceClient client;
+String endpoint = client.getEndpoint().replace("login.salesforce.com", "test.salesforce.com");
+client.setEndpoint(endpoint);
 	</pre>
 </div>

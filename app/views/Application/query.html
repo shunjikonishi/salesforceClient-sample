@@ -1,0 +1,69 @@
+#{extends 'main.html' /}
+<h2>クエリ</h2>
+<div>
+	<p><a href="https://github.com/shunjikonishi/salesforceClient-sample/blob/master/app/samples/QuerySample.java">QuerySample.java</a></p>
+	<p>クエリはqueryメソッドにSELECT文を渡すことで実行できます。</p>
+</div>
+<hr>
+<div>
+	<h3>サンプル</h3>
+	<p>名前の部分一致検索、または全件検索します。(全件検索の場合は最初の5件のみ表示)</p>
+	<p>実行しているクエリ</p>
+	<pre>
+select id, 
+       name, 
+       (select id, name from Contacts), 
+       createdBy.name, 
+       createdDate 
+  from account</pre>
+	<form action="query" class="form-horizontal">
+		<div class="form-group">
+			<label class="col-sm-1 control-label" for="query-name">名前</label>
+			<div class="col-sm-4">
+				<input id="query-name" name="name" class="form-control" value="${params.name}">
+			</div>
+		</div>
+		<div class="from-group">
+			<div class="col-sm-2">
+				<input type="submit" value="実行" class="btn btn-primary">
+			</div>
+		</div>
+	</form>
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Id</th>
+				<th>Name</th>
+				<th>Contact</th>
+				<th>CreatedBy</th>
+				<th>CreatedDate</th>
+			</tr>
+		</thead>
+		<tbody>
+			#{list items: result.getRecords(), as: "obj"}
+				<tr>
+					<td>${obj.id}</td>
+					<td>${obj.getString("Name")}</td>
+					<td>${obj.getQueryResult("Contacts")?.getAllSize()}</td>
+					<td>${obj.getObject("CreatedBy").getString("Name")}</td>
+					<td>${obj.getDate("CreatedDate").format("yyyy-MM-dd HH:mm:ss")}</td>
+				</tr>
+			#{/list}
+		</tbody>
+	</table>
+	<hr>
+	<p>結果セットの行数が多くすべてのデータが返されていない場合はQueryResult#getQueryLocatorで取得した文字列をSalesforceClient#queryMoreに渡すことで後続の結果セットを取得することができます。</p>
+</div>
+<hr>
+<div>
+	<h3>クエリ時の詳細設定</h3>
+	<p>クエリの引数としてSELECT文字列ではなくQueryRequestオブジェクトを渡すことでクエリの詳細設定を行うことができます。</p>
+	<p>設定できる項目は以下です。</p>
+	<ul>
+		<li>バッチサイズ(一回のクエリで返すことができる行数)。200-1000の間で設定</li>
+		<li>Resultクラス。<a href="subclass">SObjectサブクラスの作成</a>を参照</li>
+		<li>Filterクラス。結果セットに含むオブジェクトを独自のロジックでフィルタリングする場合に使用</li>
+		<li>QueryAll。trueにした場合削除レコードもクエリ結果に含まれます。</li>
+		<li>AutoMore。trueにした場合QueryMoreが自動的に実行されすべての結果セットを取得します。(メモリ、時間ともにコストが大きくなります。)</li>
+	</ul>
+</div>

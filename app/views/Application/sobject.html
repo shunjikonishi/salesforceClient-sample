@@ -1,0 +1,49 @@
+#{extends 'main.html' /}
+<h2>SObject</h2>
+<div>
+	<p><a href="https://github.com/shunjikonishi/salesforceClient-sample/blob/master/app/samples/QuerySample.java">QuerySample.java</a></p>
+	<p>SObjectはSalesforceのオブジェクト1レコードに対応するクラスです。</p>
+</div>
+<div>
+	<h3>基本的な使い方</h3>
+	<p>SObjectのインスタンスはSalesforceClient#newObjectにオブジェクト名を指定することで生成されます。</p>
+	<p>インスタンスに対してはget/setメソッドで名前を指定して自由に値を取得／設定できます。getterに関してはgetString、getInt、getDateなどパース＆キャストを同時に行うユーティリティメソッドもあります。</p>
+	<pre>
+SalesforceClient client;
+SObject obj = client.newObject("Account");
+obj.set("Name", "hoge");
+
+Object o = obj.get("Name");
+String s = obj.getString("Name");</pre>
+	<p class="alert alert-warning">
+		Salesforceのフィールド名は大文字小文字を区別しませんが、SObjectのgetter/setterは大文字小文字を区別します。
+	</p>
+</div>
+<div>
+	<h3>参照関係と親子関係</h3>
+	<p>クエリで参照関係や親子関係を含めてSELECTした場合はそれらのフィールドはSObjectまたはQueryResultとして取得できます。</p>
+	<pre>
+SObject account;//取引先
+QueryResult<SObject> contacts = account.getQueryResult("Contacts");
+if (contacts != null) {
+	for (SObject c : contacts.getRecords()) {
+		System.out.println("Contact: " + c.getString("Name"));
+	}
+}
+SObject createdBy = account.getObject("CreatedBy");
+if (createdBy != null) {
+	System.out.println("CreatedBy: " + createdBy.getString("Name"));
+}</pre>
+	<p>
+		クエリで取得していないフィールドをgetしようとしてもnullになります。
+	</p>
+</div>
+<div>
+	<h3>サブクラスの作成</h3>
+	<p><a href="https://github.com/shunjikonishi/salesforceClient-sample/blob/master/app/models/Account.java">//ToDo Account.java</a></p>
+	
+	<p><a href="https://github.com/shunjikonishi/salesforceClient-sample/blob/master/app/models/Account.java">//ToDo Account.java</a></p>
+	<p>作成したサブクラスをMetaData#registerClassメソッドで登録しておけばSalesforceClient#newObjectでその名前で作成されるオブジェクトはそのクラスになります。</p>
+	<p><a href="https://github.com/shunjikonishi/salesforceClient-sample/blob/master/app/models/Account.java">//ToDo Account.java</a></p>
+	<p>クエリ実行時には第2引数(またはQueryRequestのReturnClassプロパティ)にClassを設定することでクエリの結果セットのクラスはそのクラスになます。</p>
+</div>
