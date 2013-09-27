@@ -1,0 +1,14 @@
+# Application dependencies
+
+require:
+    - play
+    - jp.co.flect -> flectCommon     1.1
+    - jp.co.flect -> flectSoap       1.1.1
+    - jp.co.flect -> flectSalesforce 1.1
+
+repositories:
+    - flect:
+        type:   http
+        root:   "http://flect.github.io/maven-repo/"
+        contains:
+            - jp.co.flect -> *

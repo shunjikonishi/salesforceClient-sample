@@ -1,0 +1,22 @@
+#{extends 'main.html' /}
+<h2>インスタンス生成</h2>
+<div>
+	<p>通常SalesforceClientのインスタンス生成はWSDLファイルを引数にして行います。</p>
+	<p>ただ生成時に毎回WSDLをパースするのはコストがかかるので最初にベースインスタンスを生成しておき、それをコピーコンストラクタに渡すのがセオリーです。</p>
+</div>
+<div>
+	<h3>Metadataについて</h3>
+	<p>CreateやUpdateの実行時には更新対象のオブジェクトのメタデータ(SObjectDef)が必要になります。</p>
+	<p>メタデータが取得済みでない場合は自動的に取得されますが、これは通信を伴う処理でありコストがかかります。</p>
+	<p>これを回避するためにベースクライアント生成時にあらかじめ必要なメタデータを取得しておくことで効率的な更新処理を行うことができます。</p>
+	<p>※コピーコンストラクタで生成したインスタンスでメタデータを取得してもベースインスタンスには反映されません。</p>
+</div>
+<div>
+	<h3>Sandboxに接続する場合</h3>
+	<p>Sandboxを使用する場合はSalesforceClientの生成後、ログインを行うよりも前にEndpointを「login.salesforce.com」から「test.salesforce.com」に変更します。
+	<pre>
+		SalesforceClient client;
+		String endpoint = client.getEndpoint().replace("login.salesforce.com", "test.salesforce.com");
+		client.setEndpoint(endpoint);
+	</pre>
+</div>

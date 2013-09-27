@@ -1,0 +1,22 @@
+#{extends 'main.html' /}
+<h2>前準備</h2>
+<div>
+	<h3>依存性の解決</h3>
+	<p>conf/dependencies.ymlにflectSalesforceで使用するライブラリ情報を記述して「play deps」を実行します。</p>
+	<p>バグ修正等によりリリースバージョンよりも新しいバージョンが必要になった場合は直接libフォルダにjarファイルをコピーしてください。</p>
+</div>
+<div>
+	<h3>環境変数の設定</h3>
+	<p>このサンプルではSalesforceへの接続情報を環境変数から取得しています。</p>
+	<p>このため環境変数に以下の3つの変数を設定する必要があります。</p>
+	<ul>
+		<li>SALESFORCE_USERNAME=API接続に使用するユーザー名</li>
+		<li>SALESFORCE_USERNAME=API接続に使用するユーザーのパスワード</li>
+		<li>SALESFORCE_USERNAME=API接続に使用するユーザーのセキュリティトークン</li>
+	</ul>
+</div>
+<div>
+	<h3>WSDLの取得</h3>
+	<p>SalesforceClientを使用するためにはWSDLファイルが必要です。</p>
+	<p>ここではSalesforceの「設定 ＞ 開発 ＞ API」の画面から取得したパートナーWSDLを「conf/partner.wsdl」として保存しています。</p>
+</div>
