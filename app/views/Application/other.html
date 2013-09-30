@@ -1,0 +1,26 @@
+#{extends 'main.html' /}
+<h2>その他</h2>
+<div class="row">
+	<h3>BulkAPI</h3>
+	<p>SalesforceClient#createBulkClientで<a href="https://github.com/shunjikonishi/flectSalesforce/blob/master/src/main/java/jp/co/flect/salesforce/bulk/BulkClient.java">BulkClient</a>を生成後そのAPIを介して実行することができます。</p>
+	<p>ただしすべてのAPIは非同期で扱いが面倒なためimport/exportの簡易APIを実装する予定です。(かもしれません。)</p>
+	<p class="alert alert-warning">Bulkで実装済みなのはCSVのみでXMLの実装予定はありません。</p>
+</div>
+<div class="row">
+	<h3>MetaDataAPI</h3>
+	<p>MetaDataAPIを使用するとSalesforceオブジェクト自体の作成やフィールドの追加／削除を実行することができます。</p>
+	<p>SalesforceClient#createMetadataClientで<a href="https://github.com/shunjikonishi/flectSalesforce/blob/master/src/main/java/jp/co/flect/salesforce/metadata/MetadataClient.java">MetadataClient</a>を生成後そのAPIを実行することができますが<span class="alert-danger">どこまで実装したか忘れました。</span></p>
+	<p>必要に迫られれば実装しますが、あまり需要がなさそうなのでこのまま放置される可能性も高いです。</p>
+</div>
+<div class="row">
+	<h3>OAuth</h3>
+	<p>ID、Passwordでのログインでの他にOAuthでログインさせることもできます。</p>
+	<p>その場合まずSalesforceの「作成 ＞ アプリケーション」の画面で接続アプリケーションの新規作成からOAuthクライアントの設定を行う必要があります。</p>
+	<p>実際のOAuth認証処理ではflectCommonにある<a href="https://github.com/shunjikonishi/flectCommon/blob/master/src/main/java/jp/co/flect/net/OAuth2.java">OAuth2</a>クラスが利用できます。</p>
+</div>
+<div class="row">
+	<h3>ExcelReport</h3>
+	<p>現在非公開jarファイルの中に含まれているのでコードサンプルはありません。</p>
+	<p>使い方としては<a href="https://forceexplorer.herokuapp.com/">SalesforceExplorer</a>のレポート画面で設定している値をそのままコードで設定するだけです。</p>
+	<p class="alert alert-warning">いずれはflectSalesforce.jarの方にコードを移すかもしれませんが、需要がなさそうなので多分放置です。</p>
+</div>

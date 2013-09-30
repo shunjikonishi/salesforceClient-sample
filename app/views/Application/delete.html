@@ -1,0 +1,13 @@
+#{extends 'main.html' /}
+<h2>Delete</h2>
+<div class="row">
+	<h3>基本的な使い方</h3>
+	<p>削除したいオブジェクトのIDをdeleteメソッドに渡せばOK。</p>
+	<pre>
+SalesforceClient client;
+SObject obj = doQuery(...);
+client.delete(obj.getId());</pre>
+	<p class="alert alert-info">
+		複数のオブジェクトをListで渡してまとめて更新することもできます。
+	</p>
+</div>

@@ -1,0 +1,11 @@
+#{extends 'main.html' /}
+<h2>インポートとエクスポート</h2>
+<div class="row">
+	<h2 class="alert-danger">動きません</h2>
+	<p>CSVまたはExcelファイルを介してのインポートとエクスポートをするためのメソッドが定義されています。(SalesforceClient#importFromとexportTo)</p>
+	<p>。。。が、実は<a href="https://github.com/shunjikonishi/flectSalesforce/blob/master/src/main/java/jp/co/flect/salesforce/io/csv/CSVImportRequest.java">CSV用の実装</a>が未実装だったり、Excel用の実装が非公開の別のjarファイル内で定義されていたりで、このままでは実行することができません。</p>
+	<p>また、これらのimport/export APIはBulkAPIよりも先に実装されたため、大量データ想定の処理であるのにBulkAPIを使用していないという問題もあります。</p>
+	<p>このためこれらの処理は<span class="alert-danger">必要に迫られた時に</span>BulkAPIで再実装することにします。</p>
+	<p>おそらく、その時にはインターフェース(メソッドシグネチャ)も変更するので既存のメソッドは使用しないでください。</p>
+	<p>(そもそも実装クラスがflectSalesforce.jar内にないので実行できませんが。)</p>
+</div>

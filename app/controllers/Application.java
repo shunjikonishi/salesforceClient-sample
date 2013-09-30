@@ -78,24 +78,27 @@ public class Application extends Controller {
 	public static void delete() {
 		render();
 	}
+	
 	public static void sqllike() {
 		render();
 	}
-	public static void importData() {
+	
+	public static void importAndExport() {
 		render();
 	}
-	public static void exportData() {
-		render();
-	}
+	
 	public static void sqlsync() {
 		render();
 	}
+	
 	public static void excelReport() {
 		render();
 	}
+	
 	public static void other() {
 		render();
 	}
+	
 	public static void todo() {
 		render();
 	}

@@ -1,0 +1,44 @@
+#{extends 'main.html' /}
+<h2>SQLSync</h2>
+<div class="row">
+	<h3>概要</h3>
+	<p>任意のRDBからのSELECT結果をそのままSalesforceに取り込むことができます。</p>
+	<p class="alert alert-info">内部的にはSELECT結果を元にCSVを作成し、BulkAPIでinsert(またはupsert)しています。</p>
+</div>
+<div class="row">
+	<h3>SQLの書き方</h3>
+	<p>SELECT文自体は対象とするRDBのサポートする範囲で自由に記述することができます。</p>
+	<p>唯一のルールはSELECT句のエイリアスとしてSalesforceオブジェクトのフィールド名を設定するという点です。</p>
+	<p>JDBCのパラメータも使用可能です。</p>
+	<pre>
+SELECT name AS Name,
+       col1 AS col1__c,
+       col2 AS col2__c
+  FROM table1
+ WHERE update_date > ?</pre>
+	<p class="alert alert-info">upsertする場合はSELECT句内に外部IDフィールドが必要です。</p>
+</div>
+<div class="row">
+	<h3>サンプルコード</h3>
+	<pre>
+SalesforceClient client;
+Connection con;//RDBのコネクション
+String query = "SELECT ...";//RDBに対するSELECT文
+String objectName = "Account";//更新対象のSalesforceオブジェクト名
+
+SQLSyncRequest request = new SQLSyncRequest(con, query, objectName);
+
+request.setParams("hoge", 5);//queryでJDBCのパラメータを使用している場合はその値を設定する
+request.setExternalIdFieldName("xxx__c");//外部IDフィールドを設定した場合はupsertに、指定しなければinsertになる。
+
+SQLSyncResult result = client.sqlsync(request);
+/*
+//Bulkリクエストは非同期なのでresultが返ってきても時点では処理は完了していない
+//処理の完了を待つなら以下のようにループを回す必要があるが通常は不要(結果はSalesforceのコンソールで確認可能)
+while (!result.isDone()) {
+	System.out.println("sqlsyncStatus=" + result.getStatus());
+	Thread.sleep(2000);
+}
+*/</pre>
+	<p>Bulkの詳細な結果はSalesforceの「設定 ＞ 監視 ＞ 一括データ読み込みジョブ」で確認できます。</p>
+</div>
