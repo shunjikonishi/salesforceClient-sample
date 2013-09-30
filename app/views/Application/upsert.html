@@ -1,0 +1,21 @@
+#{extends 'main.html' /}
+<h2>Upsert</h2>
+<div class="row">
+	<h3>基本的な使い方</h3>
+	<p>SObjectの設定したいフィールドに値を設定してupsertメソッドに渡せばOK。</p>
+	<p>updateメソッドに渡すSObjectには<span class="alert-danger">IDが設定されていてはならず、外部IDが設定されている必要があります。</span></p>
+	<pre>
+SalesforceClient client;
+SObject newObj = client.newObject("Contact");
+newObj.set("ExId__c", "xxx");
+newObj.set("Name", "hogehoge");
+
+client.upsert(newObj);</pre>
+	<p class="alert alert-info">
+		createと同様、複数のオブジェクトをListで渡してまとめて更新することもできます。
+	</p>
+	<p>
+		upsert時に使用する外部IDフィールドは基本的にはオブジェクト定義から自動的に取得されますが、
+		オブジェクトに複数の外部IDフィールドがある場合はUpsertRequest#setExternalIdFieldで明示的に指定してください。
+	</p>
+</div>

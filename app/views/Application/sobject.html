@@ -40,10 +40,49 @@ if (createdBy != null) {
 </div>
 <div>
 	<h3>サブクラスの作成</h3>
-	<p><a href="https://github.com/shunjikonishi/salesforceClient-sample/blob/master/app/models/Account.java">//ToDo Account.java</a></p>
+	<p><a href="https://github.com/shunjikonishi/salesforceClient-sample/blob/master/app/models/Account.java">Account.java</a></p>
 	
-	<p><a href="https://github.com/shunjikonishi/salesforceClient-sample/blob/master/app/models/Account.java">//ToDo Account.java</a></p>
 	<p>作成したサブクラスをMetaData#registerClassメソッドで登録しておけばSalesforceClient#newObjectでその名前で作成されるオブジェクトはそのクラスになります。</p>
-	<p><a href="https://github.com/shunjikonishi/salesforceClient-sample/blob/master/app/models/Account.java">//ToDo Account.java</a></p>
 	<p>クエリ実行時には第2引数(またはQueryRequestのReturnClassプロパティ)にClassを設定することでクエリの結果セットのクラスはそのクラスになます。</p>
+	<form action="sobject" class="form-horizontal">
+		<div class="form-group">
+			<label class="col-sm-1 control-label" for="query-id">ID</label>
+			<div class="col-sm-4">
+				<input id="query-id" name="id" class="form-control" value="${id}">
+			</div>
+		</div>
+		<div class="from-group">
+			<div class="col-sm-2">
+				<input type="submit" value="実行" class="btn btn-primary">
+			</div>
+		</div>
+	</form>
+	#{if account != null}
+	<div style="padding-top:50px;">
+		<table class="table">
+			<tbody>
+				<tr>
+					<th>Id</th>
+					<td>${account.id}</td>
+				</tr>
+				<tr>
+					<th>Name</th>
+					<td>${account.name}</td>
+				</tr>
+				<tr>
+					<th>Fax</th>
+					<td>${account.fax}</td>
+				</tr>
+				<tr>
+					<th>Phone</th>
+					<td>${account.phone}</td>
+				</tr>
+				<tr>
+					<th>LastActivityDate</th>
+					<td>${account.lastActivityDate}</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	#{/if}
 </div>

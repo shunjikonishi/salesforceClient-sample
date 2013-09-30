@@ -1,0 +1,83 @@
+#{extends 'main.html' /}
+<h2>Create</h2>
+<div>
+	<p><a href="https://github.com/shunjikonishi/salesforceClient-sample/blob/master/app/samples/CreateSample.java">CreateSample.java</a></p>
+</div>
+<div class="row">
+	<h3>基本的な使い方</h3>
+	<p>SObjectの設定したいフィールドに値を設定してcreateメソッドに渡せばOK。</p>
+	<form action="create" class="form-horizontal">
+		<div class="form-group">
+			<label class="col-sm-1 control-label" for="create-name">Name</label>
+			<div class="col-sm-4">
+				<input id="create-name" name="name" class="form-control" value="${name}">
+			</div>
+		</div>
+		<div class="from-group">
+			<div class="col-sm-2">
+				<input type="submit" value="実行" class="btn btn-primary">
+			</div>
+		</div>
+	</form>
+	#{if account != null}
+	<div style="padding-top:50px;">
+		<table class="table">
+			<tbody>
+				<tr>
+					<th>Id</th>
+					<td>${account.id}</td>
+				</tr>
+				<tr>
+					<th>Name</th>
+					<td>${account.name}</td>
+				</tr>
+				<tr>
+					<th>CreatedDate</th>
+					<td>${account.createdDate}</td>
+				</tr>
+				<tr>
+					<th>CreatedBy</th>
+					<td>${account.createdByName}</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	#{/if}
+</div>
+<div class="row">
+	<h3>親子関係のオブジェクトをまとめて作成</h3>
+	<p>親オブジェクトに外部IDフィールドがあれば親子関係をまとめて作成できます。</p>
+	<div class="row">
+		<form action="createParentAndChild" class="form-horizontal" target="_blank">
+			<div class="form-group">
+				<label class="col-sm-1 control-label" for="create-name2">Name</label>
+				<div class="col-sm-4">
+					<input id="create-name2" name="name" class="form-control" value="${name}">
+				</div>
+			</div>
+			<div class="from-group">
+				<div class="col-sm-2">
+					<input type="submit" value="実行" class="btn btn-primary">
+				</div>
+			</div>
+		</form>
+	</div>
+	<div class="alert alert-warning">
+	<p>
+		デフォルトでは複数オブジェクトの更新は一部だけが成功することがあります。<br>
+		ひとつでもエラーがある場合に全てのオブジェクトの作成を失敗させるにはCreateRequest#setAllOrNone(true)を設定します。
+	</p>
+	</div>
+	<p>このフォームでは指定したオブジェクトを作成し、Salesforceの画面にリダイレクトします。</p>
+	<p>Salesforce上での当該オブジェクトの表示画面はメタデータから取得することができます。</p>
+	
+	<pre>
+SalesforceClient client;
+String id;
+SObjectDef objDef = client.getMetadata().getObjectDef("Account");
+if (objDef == null) {
+	//最初にdescribeObjectを実行しているか、create等の更新メソッドでAccountを扱っていれば発生しない
+	throw new IllegalStateException();
+}
+redirect(objDef.getString("urlDetail").replaceAll("\\{ID\\}", id));</pre>
+</div>

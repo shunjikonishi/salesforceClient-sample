@@ -42,7 +42,7 @@ select id,
 		<tbody>
 			#{list items: result.getRecords(), as: "obj"}
 				<tr>
-					<td>${obj.id}</td>
+					<td><a href="sobject?id=${obj.id}">${obj.id}</a></td>
 					<td>${obj.getString("Name")}</td>
 					<td>${obj.getQueryResult("Contacts")?.getAllSize()}</td>
 					<td>${obj.getObject("CreatedBy").getString("Name")}</td>

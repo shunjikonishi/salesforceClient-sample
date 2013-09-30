@@ -1,14 +1,22 @@
 package models;
 
 import jp.co.flect.salesforce.SalesforceClient;
+import jp.co.flect.salesforce.Metadata;
 import jp.co.flect.soap.InvalidWSDLException;
 import jp.co.flect.soap.SoapException;
 import jp.co.flect.xmlschema.XMLSchemaException;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.xml.sax.SAXException;
 
 public class Salesforce {
+	
+	static {
+		//Metadataにこのオブジェクトを登録
+		Metadata.registerClass("Account", Account.class);
+	}
 	
 	private static final String USERNAME = System.getenv("SALESFORCE_USERNAME");
 	private static final String PASSWORD = System.getenv("SALESFORCE_PASSWORD");
@@ -34,6 +42,7 @@ public class Salesforce {
 			LOGIN_TIME = System.currentTimeMillis();
 			BASE_CLIENT.login(USERNAME, PASSWORD, TOKEN);
 			
+			loadMetadata(BASE_CLIENT);
 			//ToDo collectMetadata
 		}
 		long t = System.currentTimeMillis();
@@ -43,5 +52,12 @@ public class Salesforce {
 		}
 		SalesforceClient client = new SalesforceClient(BASE_CLIENT);
 		return client;
+	}
+	
+	private static void loadMetadata(SalesforceClient client) throws IOException, SoapException {
+		List<String> list = new ArrayList<String>();
+		list.add("Account");
+		list.add("Contact");
+		client.describeSObjects(list);
 	}
 }

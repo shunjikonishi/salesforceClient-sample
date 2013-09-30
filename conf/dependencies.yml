@@ -8,7 +8,7 @@ require:
 
 repositories:
     - flect:
-        type:   http
+        type:   iBiblio
         root:   "http://flect.github.io/maven-repo/"
         contains:
             - jp.co.flect -> *
