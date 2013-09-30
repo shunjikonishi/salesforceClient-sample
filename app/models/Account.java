@@ -3,6 +3,7 @@ package models;
 import jp.co.flect.salesforce.SObject;
 import jp.co.flect.salesforce.SObjectDef;
 import jp.co.flect.salesforce.Metadata;
+import jp.co.flect.salesforce.sobject.User;
 import java.util.Date;
 
 /**
@@ -17,9 +18,6 @@ public class Account extends SObject {
 		super(objectDef);
 	}
 	
-	public String getName() { return getString("Name");}
-	public void setName(String s) { set("Name", s);}
-	
 	public String getFax() { return getString("Fax");}
 	public void setFax(String s) { set("Fax", s);}
 	
@@ -29,11 +27,9 @@ public class Account extends SObject {
 	public Date getLastActivityDate() { return getDate("LastActivityDate");}
 	public void setLastActivityDate(Date d) { set("LastActivityDate", d);}
 	
-	public Date getCreatedDate() { return getDate("CreatedDate");}
-	
 	public String getCreatedByName() { 
-		SObject obj = getObject("CreatedBy");
-		return obj == null ? null : obj.getString("Name");
+		User user = getCreatedBy();
+		return user == null ? null : user.getName();
 	}
 	
 	public String getExId() { return getString("ExID__c");}
