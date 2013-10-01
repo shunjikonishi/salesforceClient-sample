@@ -1,0 +1,59 @@
+package ${pkg};
+
+import jp.co.flect.salesforce.SObject;
+import jp.co.flect.salesforce.SObjectDef;
+import jp.co.flect.salesforce.Metadata;
+import jp.co.flect.salesforce.query.QueryResult;
+import java.util.Date;
+
+public class ${obj.className} extends SObject {
+	
+	public ${obj.className}(Metadata meta) {
+		super(meta);
+	}
+	public ${obj.className}(SObjectDef objectDef) {
+		super(objectDef);
+	}
+	
+#{list items: obj.fieldList, as: "field"}
+#{if obj.isSingleRelation(field)}
+	public ${obj.getJavaType(field)} ${obj.getMethodName(field, true)}() {
+		String id = getString("${field.name}");
+		if (id != null) {
+			return id;
+		}
+		SObject obj = getObject("${field.relationshipName}");
+		return obj == null ? null : obj.getId();
+	}
+	
+	public SObject get${field.relationshipName.replaceAll("__r", "").capitalizeWords()}() {
+		return getObject("${field.relationshipName}");
+	}
+	
+#{if field.isUpdateable()}
+	public void ${obj.getMethodName(field, false)}(${obj.getJavaType(field)} v) {
+		set("${field.name}", v);
+	}
+	
+	public void set${field.relationshipName.replaceAll("__r", "").capitalizeWords()}(SObject v) {
+		set("${field.relationshipName}", v);
+	}
+#{/if}
+#{/if}
+#{else}
+	public ${obj.getJavaType(field)} ${obj.getMethodName(field, true)}() {
+		return get${obj.getJavaType(field).replaceAll("Object", "").capitalizeWords()}("${field.name}");
+	}
+#{if field.isUpdateable()}
+	public void ${obj.getMethodName(field, false)}(${obj.getJavaType(field)} v) {
+		set("${field.name}", v);
+	}
+#{/if}
+#{/else}
+#{/list}
+#{list items: obj.relationList, as: "rel"}
+	public <T extends SObject> QueryResult<T> get${rel.relationshipName}() {
+		return getQueryResult("${rel.relationshipName}");
+	}
+#{/list}
+}

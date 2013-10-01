@@ -4,6 +4,7 @@ import jp.co.flect.salesforce.SalesforceClient;
 import jp.co.flect.salesforce.Metadata;
 import jp.co.flect.soap.InvalidWSDLException;
 import jp.co.flect.soap.SoapException;
+import jp.co.flect.soap.WSDL;
 import jp.co.flect.xmlschema.XMLSchemaException;
 import java.io.File;
 import java.io.IOException;
@@ -24,6 +25,21 @@ public class Salesforce {
 	
 	private static long LOGIN_TIME = 0;
 	private static SalesforceClient BASE_CLIENT;
+	
+	public static synchronized WSDL getWSDL() {
+		if (BASE_CLIENT == null) {
+			try {
+				createClient();
+			} catch (IOException e) {
+				//ignore
+				e.printStackTrace();
+			} catch (SoapException e) {
+				//ignore
+				e.printStackTrace();
+			}
+		}
+		return BASE_CLIENT.getWSDL();
+	}
 	
 	public static synchronized SalesforceClient createClient() throws IOException, SoapException {
 		if (BASE_CLIENT == null) {

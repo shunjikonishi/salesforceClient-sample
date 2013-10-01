@@ -11,6 +11,11 @@ GET     /favicon.ico                            404
 # Map static resources from the /app/public folder to the /public path
 GET     /public/                                staticDir:public
 
+# OAuth
+GET     /oauth                                  OAuth.oauth
+GET     /login                                  OAuth.login
+POST    /genJava                                OAuth.genJava
+
 # Catch all
 *       /{controller}/{action}                  {controller}.{action}
 *       /{action}                               Application.{action}

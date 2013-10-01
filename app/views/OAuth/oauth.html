@@ -1,0 +1,90 @@
+#{extends 'main.html' /}
+#{set "moreStyles"}
+<style>
+.sobjectDef-head tr {
+	float: left;
+}
+.sobjectDef-head tr th:nth-of-type(1),
+.sobjectDef-body tr td:nth-of-type(1) {
+	width: 40px;
+}
+.sobjectDef-head tr th:nth-of-type(2),
+.sobjectDef-body tr td:nth-of-type(2) {
+	width: 300px;
+}
+.sobjectDef-head tr th:nth-of-type(3),
+.sobjectDef-body tr td:nth-of-type(3) {
+	width: 300px;
+}
+.sobjectDef-body {
+	height: 400px;
+	float: left;
+	overflow: auto;
+}
+</style>
+#{/set}
+<h2>OAuth</h2>
+<div class="row">
+	<p><a href="https://github.com/shunjikonishi/salesforceClient-sample/blob/master/app/controllers/OAuth.java">OAuth.java</a></p>
+	<p>この画面ではID/PasswordでログインしたSalesforceClientではなくOAuthでログインしたクライアントを使用しています。</p>
+</div>
+<div class="row">
+	<h3>前準備</h3>
+	<p>
+		Salesforceの「設定 ＞ 作成 ＞ アプリケーション」の画面から新規接続アプリケーションを作成。
+	</p>
+	<p>
+		必要な設定は以下
+	</p>
+	<ul>
+		<li>OAuth設定の有効化をチェック</li>
+		<li>OAuth範囲で「データへのアクセスと管理(api)」を選択</li>
+		<li>コールバックURL(認可後にリダイレクトされるURL)を設定</li>
+	</ul>
+	<p class="alert alert-info">
+		コールバックURLはホストに「localhost」を指定する場合はhttpが使用できますが、それ以外の場合はhttpsが必須です。
+	</p>
+</div>
+<div class="row">
+	<h3>OAuthプログラミング</h3>
+	<p>
+		OAuthの実行にはflectCommonにある<a href="https://github.com/shunjikonishi/flectCommon/blob/master/src/main/java/jp/co/flect/net/OAuth2.java">OAuth2</a>クラスが利用できます。
+	</p>
+	<p>
+		このクラスを必要な情報を元に構築するとメソッドでログインURLや認証が行えるので便利です。
+	</p>
+</div>
+<div class="row">
+	<h3>オブジェクト一覧</h3>
+	<p>
+		接続した組織のオブジェクト一覧です。
+	</p>
+	<p>
+		オブジェクトを選択して生成ボタンをクリックするとそのオブジェクトのSObjectサブクラスのソースを生成してzipダウンロードできます。
+	</p>
+	<form action="genJava" method="post">
+		<label>
+			パッケージ
+			<input name="pkg" value="models">
+		</label>
+		<input type="submit" value="生成" class="btn btn-primary">
+		<table class="table">
+			<thead class="sobjectDef-head">
+				<tr>
+					<th>&nbsp;</th>
+					<th>Label</th>
+					<th>Name</th>
+				</tr>
+			</thead>
+			<tbody class="sobjectDef-body">
+				#{list items: list, as: "obj"}
+					<tr>
+						<td><input name="obj" type="checkbox" value="${obj.name}"></td>
+						<td>${obj.label}</td>
+						<td>${obj.name}</td>
+					</tr>
+				#{/list}
+			</tbody>
+		</table>
+	</form
+</div>
