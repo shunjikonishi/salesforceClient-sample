@@ -26,7 +26,7 @@
 <h2>OAuth</h2>
 <div class="row">
 	<p><a href="https://github.com/shunjikonishi/salesforceClient-sample/blob/master/app/controllers/OAuth.java">OAuth.java</a></p>
-	<p>この画面ではID/PasswordでログインしたSalesforceClientではなくOAuthでログインしたクライアントを使用しています。</p>
+	<p>この画面ではバックエンドでID/PasswordでログインしたSalesforceClientではなくOAuthでログインしたクライアントを使用します。</p>
 </div>
 <div class="row">
 	<h3>前準備</h3>
@@ -54,6 +54,13 @@
 		このクラスを必要な情報を元に構築するとメソッドでログインURLや認証が行えるので便利です。
 	</p>
 </div>
+#{if loginUrl != null}
+<div class="row">
+	<p><a href="${loginUrl}" class="btn btn-primary">OAuthでログイン</a></p>
+	<p>ログインすると組織のオブジェクト一覧が取得され、選択したオブジェクトのSObjectサブクラスのソースコードを自動生成することができます。</p>
+</div>
+#{/if}
+#{else}
 <div class="row">
 	<h3>オブジェクト一覧</h3>
 	<p>
@@ -88,3 +95,4 @@
 		</table>
 	</form
 </div>
+#{/else}

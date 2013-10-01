@@ -39,17 +39,21 @@ public class OAuth extends Controller {
 	}
 	
 	public static void oauth() throws Exception {
+		String loginUrl = null;
+		List<SObjectDef> list = null;
+		
 		String token = (String)Cache.get(session.getId() + "-oauth-token");
 		String endpoint = (String)Cache.get(session.getId() + "-oauth-endpoint");
 		if (token == null || endpoint == null) {
 			OAuth2 oauth = createOAuth2(request.getBase());
-			redirect(oauth.getLoginUrl());
+			loginUrl = oauth.getLoginUrl();
+		} else {
+			SalesforceClient client = new SalesforceClient(Salesforce.getWSDL());
+			client.setSessionId(token);
+			client.setEndpoint(endpoint);
+			list = client.describeGlobal().getObjectDefList();
 		}
-		SalesforceClient client = new SalesforceClient(Salesforce.getWSDL());
-		client.setSessionId(token);
-		client.setEndpoint(endpoint);
-		List<SObjectDef> list = client.describeGlobal().getObjectDefList();
-		render(list);
+		render(loginUrl, list);
 	}
 	
 	public static void login(String code) throws Exception {
@@ -66,13 +70,16 @@ public class OAuth extends Controller {
 	}
 	
 	public static void genJava(String pkg, String[] obj) throws Exception {
-		if (pkg == null || obj == null || obj.length == 0) {
-			badRequest();
-		}
 		String token = (String)Cache.get(session.getId() + "-oauth-token");
 		String endpoint = (String)Cache.get(session.getId() + "-oauth-endpoint");
 		if (token == null || endpoint == null) {
 			badRequest();
+		}
+		if (pkg == null || pkg.length() == 0) {
+			renderText("パッケージ名を指定してください。");
+		}
+		if (obj == null || obj.length == 0) {
+			renderText("オブジェクトを一つ以上選択してください。");
 		}
 		SalesforceClient client = new SalesforceClient(Salesforce.getWSDL());
 		client.setSessionId(token);
