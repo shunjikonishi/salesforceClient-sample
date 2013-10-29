@@ -91,6 +91,10 @@ public class Application extends Controller {
 		render();
 	}
 	
+	public static void sobjectsync() {
+		render();
+	}
+	
 	public static void excelReport() {
 		render();
 	}

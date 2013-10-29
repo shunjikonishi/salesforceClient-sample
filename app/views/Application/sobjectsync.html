@@ -1,0 +1,190 @@
+#{extends 'main.html' /}
+<h2>SObjectSync</h2>
+<div class="row">
+	<p class="alert alert-danger">
+		この文書は現在のカレントバージョン(flectSalesforce-1.2-SNAPSHOT.jar)で実装中の機能を説明したものです。<br/>
+		現在のリリースバージョン(flectSalesforce-1.1.1.jar)では利用できません。
+	</p>
+	<p class="alert alert-danger">
+		<b>ちなみに現在はMySQLでしか動きません。</b><br/>
+		1.2リリース(いつ？)までにはPostgreSQLその他のDBにも対応予定です。
+	</p>
+</div>
+<div class="row">
+	<h3>概要</h3>
+	<p>任意のSalesforceオブジェクトからのSELECT結果をRDBのテーブルに取り込むことができます。</p>
+	<p>テーブル上に指定のキーに対応するレコードが既にある場合はUPDATE、ない場合はINSERTという動作になります。</p>
+	<div class="alert alert-warning">
+		<p>
+			この機能は<a href="sqlsync">SQLSync</a>と対称的なものなのて関連クラスをbulkパッケージで作成していますが、実際にはBulkAPIは使用していません。<br/>
+			これはBulkAPIのクエリが参照項目(「SELECT Account.Name FROM Contact」という書式)をサポートしていないためです。
+		</p>
+		<p>将来的に</p>
+		<p>
+			<ul>
+				<li>大量データの高速な移行が必要</li>
+				<li>参照項目に対するクエリは不要(またはBulkAPIで参照項目がサポートされる)</li>
+			</ul>
+		</p>
+		<p>という要件が発生した場合には内部的にBulkを使用するバージョンを作成するかもしれませんが、今のところその予定はありません。</p>
+	</div>
+</div>
+<div class="row">
+	<h3>基本的な使い方</h3>
+	<p>基本的な使い方はSalesforceオブジェクトのフィールドとRDBテーブルのカラムをマッピングするだけです。</p>
+	<p>参照項目を使用する場合は「CreatedBy.Name」のようにドット区切りでフィールド名を指定します。</p>
+	<pre>
+SalesforceClient client;
+java.sql.Connection con;//移行対象のRDBのコネクション
+
+SObjectSyncRequest request = new SObjectSyncRequest(con, "TestObject__c", "TestTable");
+request.addFieldMapping("Id", "ID");
+request.addFieldMapping("Name", "NAME");
+request.addFieldMapping("Text__c","TEXT__C");
+request.addFieldMapping("Int__c", "INT__C");
+request.addFieldMapping("DateTime__c", "DATETIME__C");
+request.addFieldMapping("CreatedBy.Name", "CREATE_USER");
+
+//テーブルのキー項目(複数カラムが設定可能です。)
+request.setKeyColumns("ID");
+
+//移行処理の実行ポリシーの設定(後述)
+request.setPolicy(SObjectSyncRequest.SObjectSyncPolicy.IgnoreRecordError);
+
+//Salesforceへのクエリで一度に取得できるレコード数
+//値を小さくすると何度もqueryMoreが実行されることになるのでパフォーマンス的には不利ですが
+//メモリ使用量は小さくなります。
+request.setBatchSize(200);
+
+//移行処理の実行
+//実行は別スレッドで非同期に行われるためresultが返ってきたタイミングではまだ処理は完了していません。
+SObjectSyncResult result = client.syncSObject(request);
+
+//実行の終了を待って結果を取得するにはSObjectSyncResult#getメソッドを実行します。
+//(SObjectSyncResultはjava.util.concurrent.Futureインターフェースを実装しています。)
+SObjectSyncInfo info = result.get();
+System.out.println("Updated records: " + info.getSuccessCount());</pre>
+	<p>上記のコードではTestObject__cの全レコードがTestTableに移行されます。</p>
+</div>
+<div class="row">
+	<h3>SELECT条件の指定</h3>
+	<p>SalesforceオブジェクトのSELECT条件を指定する場合はSObjectSyncRequest#setWhereメソッドで自由にWHERE句の内容を記述できます。</p>
+	<p>WHERE句の中でパラメータのプレースホルダとして「?」を使用することも可能です。</p>
+	<pre>
+SObjectSyncRequest request;
+...
+
+//最終更新日が10月1日以降で作成者がtest@flect.co.jpのレコードのみ対象
+request.setWhere("LastModifiedDate > ? AND CreatedBy.Username = ?");
+request.setParams(new SimpleDateFormat("yyyy-MM-dd").parse("2013-10-01"), "test@flect.co.jp");</pre>
+</div>
+<div class="row">
+	<h3>複数フィールドからの計算結果をマッピングする</h3>
+	<p>Salesforceオブジェクトのレコードに対して何らかの計算を行った結果をテーブルに格納することもできます。</p>
+	<p>その場合計算を行うクラスをSObjectSyncRequest#addFunctionMappingで登録します。</p>
+	<pre>
+SObjectSyncRequest request;
+...
+
+//姓と名を連結してNAME列に格納する場合
+
+//FirstName__cとLastName__cには移行対象のカラムが無いが、
+//SELECT句には含めなければならないのでnullをマッピングする
+request.addFieldMapping("FirstName__c", null);
+request.addFieldMapping("LastName__c", null);
+
+//NAME列に対して関数を登録
+//SObjectSyncRequest.Functionは
+//
+//  Object evaluate(SObject obj)
+//
+//の1メソッドのみを持つインターフェースです。
+request.addFunctionMapping("NAME", new SObjectSyncRequest.Function() {
+    @Override
+    public Object evaluate(SObject obj) {
+        String fn = obj.getString("FirstName__c");
+        String ln = obj.getString("LastName__c");
+        return ln + fn;
+    }
+});
+
+//オブジェクトの内容とは無関係なデフォルト値を登録することもできます。
+//<a href="https://github.com/shunjikonishi/flectSalesforce/blob/master/src/main/java/jp/co/flect/salesforce/bulk/DefaultValue.java">DefaultValue</a>はコンストラクタ引数の値を返すだけのFunction実装です。
+request.addFunctionMapping("DEL_FLG", new DefaultValue(0));
+</pre>
+</div>
+<div class="row">
+	<h3>処理の実行ポリシー</h3>
+	<p>RDBに対するコミットをどのタイミングで実行するか、また処理中のエラーをどのように扱うかをSObjectSyncRequest#setPolicyメソッドで設定できます。</p>
+	<p>ポリシーには以下の3種類があります。</p>
+	<dl>
+		<dt>CommitOnce</dt>
+		<dd><p>全レコードを1度にコミットする。移行処理はすべて成功するかすべて失敗するかのいずれかになります。</p></dd>
+		
+		<dt>CommitPerQuery</dt>
+		<dd>
+			<p>
+				大量データをSELECTする場合クエリは複数回のqueryMoreに分割されますが、そのクエリ毎にコミットされます。<br/>
+				例えば1000件のデータに対してBatchSize=200でクエリを実行した場合、結果セットは5回にわけて返ってきます。<br/>
+				その3回目の結果セットのなかにエラーとなるレコードが含まれていた場合、400件がコミットされてそこで中断(SQLExceptionをthrow)します。
+			</p>
+		</dd>
+		
+		<dt>IgnoreRecordError</dt>
+		<dd>
+			<p>
+				個別のレコードエラーを無視します。<br/>
+				例えば文字列長の超過などRDBへのINSERT/UPDATEがエラーとなった場合でも処理を中断せずに続行します。<br/>
+				コミットの単位はCommitPerQueryと同じくクエリ単位となります。
+			</p>
+			<p>
+				エラーレコードを個別にハンドルするためにはSObjectSyncronizerListenerを利用します。
+			</p>
+		</dd>
+	</dl>
+</div>
+<div class="row">
+	<h3>SObjectSyncrhronizerListener</h3>
+	<p><a href="https://github.com/shunjikonishi/flectSalesforce/blob/master/src/main/java/jp/co/flect/salesforce/event/SObjectSynchronizerListener.java">SObjectSynchronizerListener</a>は同期処理の実行中にいくつかのタイミングで発生するイベントをハンドルするためのListenerです。</p>
+	<p>どのようなタイミングでイベントが発生するかについては<a href="https://github.com/shunjikonishi/flectSalesforce/blob/master/src/main/java/jp/co/flect/salesforce/event/SObjectSynchronizerEvent.java"</a>SObjectSynchronizerEvent.EventType</a>を参照してください。</p>
+	<div class="alert alert-warning">
+		<p>現時点ではこれらのイベントは増減する可能性があります。</p>
+	</div>
+	<p>開発者にとって最も重要なのはRECORD_ERRORイベントです。</p>
+	<p>これは実行ポリシーがIgnoreRecordErrorの場合にのみ発生するイベントで、個別のエラーレコード毎に発生します。</p>
+	<p>このイベントを利用してエラー行に対して何らかのアラートをあげることができます。</p>
+	<pre>
+/** 各イベントまでの経過時間と発生したエラーを記録するListener */
+class MyListener implements SObjectSynchronizerListener {
+    
+    private long startTime;
+    
+    public void handleEvent(SObjectSynchronizerEvent e) {
+        long t = System.currentTimeMillis();
+        
+        //STARTEDイベントで処理の開始時間を記録する
+        if (e.getType() == EventType.STARTED) {
+            this.startTime = t;
+        }
+        
+        //メッセージの作成
+        StringBuilder buf = new StringBuilder();
+        buf.append("type=").append(e.getType());
+        
+        //RECORD_ERRORの場合はErrorObjectが設定される
+        if (e.getErrorObject() != null) {
+            buf.append("\terrorObj=").append(e.getErrorObject().getId());
+        }
+        
+        //各種エラーイベントではExceptionが設定される
+        if (e.getException() != null) {
+            buf.append("\texception=").append(e.getException());
+        }
+        
+        //このイベントまでの経過時間を出力
+        buf.append("\ttime=").append(t - this.startTime).append("ms");
+        System.out.println(buf);
+    }
+}</pre>
+</div>
+</div>
