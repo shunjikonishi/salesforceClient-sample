@@ -5,10 +5,6 @@
 		この文書は現在のカレントバージョン(flectSalesforce-1.2-SNAPSHOT.jar)で実装中の機能を説明したものです。<br/>
 		現在のリリースバージョン(flectSalesforce-1.1.1.jar)では利用できません。
 	</p>
-	<p class="alert alert-danger">
-		<b>ちなみに現在はMySQLでしか動きません。</b><br/>
-		1.2リリース(いつ？)までにはPostgreSQLその他のDBにも対応予定です。
-	</p>
 </div>
 <div class="row">
 	<h3>概要</h3>
@@ -28,6 +24,11 @@
 		</p>
 		<p>という要件が発生した場合には内部的にBulkを使用するバージョンを作成するかもしれませんが、今のところその予定はありません。</p>
 	</div>
+	<p class="alert alert-warning">
+		動作確認はMySQL5.1とPostgreSQL9.2でのみ行っていますが、BatchUpdateをサポートするJDBCドライバであればおそらく何でも動きます。<br/>
+		MySQLでは「INSERT ON DUPLICATE KEY UPDATE」構文を使用するので他のDBMSよりも高速(なはず)です。<br/>
+		(SQL2003のMERGE構文には対応していません。)
+	</p>
 </div>
 <div class="row">
 	<h3>基本的な使い方</h3>
@@ -135,7 +136,7 @@ request.addFunctionMapping("DEL_FLG", new DefaultValue(0));
 			<p>
 				個別のレコードエラーを無視します。<br/>
 				例えば文字列長の超過などRDBへのINSERT/UPDATEがエラーとなった場合でも処理を中断せずに続行します。<br/>
-				コミットの単位はCommitPerQueryと同じくクエリ単位となります。
+				コミットの単位は原則クエリ単位ですが、エラーレコードがある場合は複数回に分けてコミットされます。
 			</p>
 			<p>
 				エラーレコードを個別にハンドルするためにはSObjectSyncronizerListenerを利用します。
@@ -172,10 +173,13 @@ class MyListener implements SObjectSynchronizerListener {
         buf.append("type=").append(e.getType());
         
         //RECORD_ERRORの場合はErrorObjectが設定される
-        if (e.getErrorObject() != null) {
+        if (e.getType() == EventType.RECORD_ERROR) {
             buf.append("\terrorObj=").append(e.getErrorObject().getId());
         }
-        
+        //SELECTEDの場合はQueryResultが設定される
+        if (e.getType() == EventType.SELECTED) {
+            buf.append("\tqueryResult=").append(e.getQueryResult().getCurrentSize());
+        }
         //各種エラーイベントではExceptionが設定される
         if (e.getException() != null) {
             buf.append("\texception=").append(e.getException());
