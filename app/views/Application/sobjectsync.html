@@ -1,12 +1,6 @@
 #{extends 'main.html' /}
 <h2>SObjectSync</h2>
 <div class="row">
-	<p class="alert alert-danger">
-		この文書は現在のカレントバージョン(flectSalesforce-1.2-SNAPSHOT.jar)で実装中の機能を説明したものです。<br/>
-		現在のリリースバージョン(flectSalesforce-1.1.1.jar)では利用できません。
-	</p>
-</div>
-<div class="row">
 	<h3>概要</h3>
 	<p>任意のSalesforceオブジェクトからのSELECT結果をRDBのテーブルに取り込むことができます。</p>
 	<p>テーブル上に指定のキーに対応するレコードが既にある場合はUPDATE、ない場合はINSERTという動作になります。</p>
@@ -148,9 +142,6 @@ request.addFunctionMapping("DEL_FLG", new DefaultValue(0));
 	<h3>SObjectSyncrhronizerListener</h3>
 	<p><a href="https://github.com/shunjikonishi/flectSalesforce/blob/master/src/main/java/jp/co/flect/salesforce/event/SObjectSynchronizerListener.java">SObjectSynchronizerListener</a>は同期処理の実行中にいくつかのタイミングで発生するイベントをハンドルするためのListenerです。</p>
 	<p>どのようなタイミングでイベントが発生するかについては<a href="https://github.com/shunjikonishi/flectSalesforce/blob/master/src/main/java/jp/co/flect/salesforce/event/SObjectSynchronizerEvent.java"</a>SObjectSynchronizerEvent.EventType</a>を参照してください。</p>
-	<div class="alert alert-warning">
-		<p>現時点ではこれらのイベントは増減する可能性があります。</p>
-	</div>
 	<p>開発者にとって最も重要なのはRECORD_ERRORイベントです。</p>
 	<p>これは実行ポリシーがIgnoreRecordErrorの場合にのみ発生するイベントで、個別のエラーレコード毎に発生します。</p>
 	<p>このイベントを利用してエラー行に対して何らかのアラートをあげることができます。</p>

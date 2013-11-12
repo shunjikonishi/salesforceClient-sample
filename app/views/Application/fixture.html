@@ -1,0 +1,121 @@
+#{extends 'main.html' /}
+<h2>Fixture</h2>
+<div class="row">
+	<h3>概要</h3>
+	<p><a href="https://github.com/shunjikonishi/flectSalesforce/blob/master/src/main/java/jp/co/flect/salesforce/fixtures/Fixture.java" target="_blank">Fixture</a>を使用するとYAMLで定義した設定内容を元にSalesforceオブジェクトを更新(新規作成)したり削除したりすることができます。</p>
+	<p>テストの際に任意のレコードを更新しては元に戻し、ということを繰り返し行わなければならない場合に非常に重宝します。</p>
+	<div class="alert alert-info">
+		<p>Fixtureの機能は単純なSalesfoceオブジェクトの更新／削除の組み合わせなので、その<a href="https://github.com/shunjikonishi/flectSalesforce/tree/master/src/main/java/jp/co/flect/salesforce/fixtures" target="_blank"><b style="color:red">ソースコード</b></a>自体がSalesforceClientの使い方のサンプルとして参考になるかもしれません。</p>
+	</div>
+</div>
+<div class="row">
+	<h3>YAML定義の方法</h3>
+	<p>まずはデータ定義に使用するYAMLのサンプルを以下に示します。</p>
+	<pre>
+カレンダー有効化:
+  $desc: 創立記念日を有効にする
+  $key: Name=創立記念日
+  $object: Calendar__c
+  HolidayType__c: 祝日
+  HolidayDt__c: 2013-09-01
+  DisableFlg__c: false
+
+カレンダー無効化:
+  $desc: 創立記念日を無効にする
+  $key: Name=創立記念日
+  $object: Calendar__c
+  HolidayType__c: 祝日
+  HolidayDt__c: 2013-09-01
+  DisableFlg__c: true
+</pre>
+	<p>上の例では休日を登録するカレンダーにテスト用の休日を登録することを想定しています。</p>
+	<p>二つの定義の差異は「DisableFlg__c(無効フラグ)」のtrue/falseのみです。</p>
+	<p>定義はYAMLのハッシュで行いそれぞれの意味は以下の通りです。</p>
+	<table class="table">
+		<thead>
+			<tr>
+				<th>項目名</th>
+				<th>必須</th>
+				<th>説明</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>[トップレベル]</td>
+				<td>○</td>
+				<td>この定義の名前です。</td>
+			</tr>
+			<tr>
+				<td>$object</td>
+				<td>○</td>
+				<td>更新対象のオブジェクト名です。</td>
+			</tr>
+			<tr>
+				<td>$key</td>
+				<td>○</td>
+				<td>更新対象のオブジェクトを特定するための条件です。<br/>項目名=値という形式で指定します。(指定できる項目は1フィールドのみです。)</td>
+			</tr>
+			<tr>
+				<td>$desc<br/>または<br/>$description</td>
+				<td>&nbsp;</td>
+				<td>任意の説明です。</td>
+			</tr>
+			<tr>
+				<td>$delete</td>
+				<td>&nbsp;</td>
+				<td>この定義が削除可能かどうかを示します。省略時はtrueになります。</td>
+			</tr>
+			<tr>
+				<td>その他の「$」で始まる項目名</td>
+				<td>&nbsp;</td>
+				<td>任意のプロパティです。プログラムから自由に利用することができます。</td>
+			</tr>
+			<tr>
+				<td>「$」以外で始まる項目名</td>
+				<td>&nbsp;</td>
+				<td>オブジェクトのフィールド名と値を指定します。</td>
+			</tr>
+		</tbody>
+	</table>
+	<div class="alert alert-warning">
+		<ul>
+			<li>$keyで指定する値にはクォートは不要です。</li>
+			<li>$keyで指定するフィールドは自動的に更新項目に含まれます。</li>
+			<li>$keyで指定するフィールドが外部ID項目である必要はありません。</li>
+		</ul>
+	</div>
+</div>
+<div class="row">
+	<h3>Fixtureの読み込み</h3>
+	<p><a href="https://github.com/shunjikonishi/flectSalesforce/blob/master/src/main/java/jp/co/flect/salesforce/fixtures/FixtureLoader.java" target="_blank">FixtureLoader</a>クラスでファイルからFixtureのListとして読み込むことができます。</p>
+	<pre>
+File f = new File("MyTestdata.yml");
+FixtureLoadeer loader = new FixtureLoader();
+List&lt;Fixture> list = loader.load(f);</pre>
+	<p>$objectや$keyが定義されていないなど設定に不備がある場合はIOExceptionとなります。</p>
+</div>
+<div class="row">
+	<h3>Fixtureの実行</h3>
+	<p>Fixtureの実行は<a href="https://github.com/shunjikonishi/flectSalesforce/blob/master/src/main/java/jp/co/flect/salesforce/fixtures/FixtureRunner.java" target="_blank">FixtureRunner</a>クラスで行います。</p>
+	<p>コンストラクタの引数はログイン済みのSalesforceClientです。</p>
+	<p>このクラスにはupdateとdeleteという二つのメソッドがあり、それぞれFixture定義にしたがったレコードの更新(新規作成)と削除を実行します。</p>
+	<pre>
+List&lt;Fixture> list;
+SalesforceClient client;
+FixtureRunner runner = new FixtureRunner(client);
+
+runner.setCacheId(true);//レコードのIDをキャッシュするかどうかの設定
+                        //falseの場合は更新／削除の前に常に$keyの定義から生成したクエリを発行してレコードを特定しますが、
+                        //trueの場合は1度実行したFixtureのIDをキャッシュするので同じオブジェクトを繰り返し更新する場合には
+                        //パフォーマンスが向上します。
+
+Fixture fx1 = list.get(0);
+Fixutre fx2 = list.get(1);
+if (ruuner.update(fx1)) { //データ更新 - 成功時にはtrueが返ります。
+	System.out.println(fx1.getName() + "のデータを更新しました。");
+}
+if (ruuner.delete(fx2)) { //データ削除 - 成功時にはtrueが返ります。
+	System.out.println(fx1.getName() + "のデータを削除しました。");
+}
+</pre>
+</div>
